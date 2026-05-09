@@ -1,9 +1,17 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\sasa\\Downloads\\HMS-project\\",
+  "WorkspaceRootPath": "C:\\Users\\sasa\\Desktop\\code\\HMS-project\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\sasa\\Downloads\\HMS-project\\auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\RegisterRequest.java||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\sasa\\Desktop\\code\\HMS-project\\patient-service\\src\\main\\java\\com\\hms\\patient\\dto\\PatientRequest.java||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:patient-service\\src\\main\\java\\com\\hms\\patient\\dto\\PatientRequest.java||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\sasa\\Desktop\\code\\HMS-project\\auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\LoginRequest.java||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\LoginRequest.java||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\sasa\\Desktop\\code\\HMS-project\\auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\RegisterRequest.java||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\RegisterRequest.java||{3B902123-F8A7-4915-9F01-361F908088D0}"
     }
   ],
@@ -19,15 +27,40 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "PatientRequest.java",
+              "DocumentMoniker": "C:\\Users\\sasa\\Desktop\\code\\HMS-project\\patient-service\\src\\main\\java\\com\\hms\\patient\\dto\\PatientRequest.java",
+              "RelativeDocumentMoniker": "patient-service\\src\\main\\java\\com\\hms\\patient\\dto\\PatientRequest.java",
+              "ToolTip": "C:\\Users\\sasa\\Desktop\\code\\HMS-project\\patient-service\\src\\main\\java\\com\\hms\\patient\\dto\\PatientRequest.java",
+              "RelativeToolTip": "patient-service\\src\\main\\java\\com\\hms\\patient\\dto\\PatientRequest.java",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001630|",
+              "WhenOpened": "2026-05-09T22:00:04.171Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "LoginRequest.java",
+              "DocumentMoniker": "C:\\Users\\sasa\\Desktop\\code\\HMS-project\\auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\LoginRequest.java",
+              "RelativeDocumentMoniker": "auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\LoginRequest.java",
+              "ToolTip": "C:\\Users\\sasa\\Desktop\\code\\HMS-project\\auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\LoginRequest.java",
+              "RelativeToolTip": "auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\LoginRequest.java",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001630|",
+              "WhenOpened": "2026-05-09T03:20:30.323Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "RegisterRequest.java",
-              "DocumentMoniker": "C:\\Users\\sasa\\Downloads\\HMS-project\\auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\RegisterRequest.java",
+              "DocumentMoniker": "C:\\Users\\sasa\\Desktop\\code\\HMS-project\\auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\RegisterRequest.java",
               "RelativeDocumentMoniker": "auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\RegisterRequest.java",
-              "ToolTip": "C:\\Users\\sasa\\Downloads\\HMS-project\\auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\RegisterRequest.java",
+              "ToolTip": "C:\\Users\\sasa\\Desktop\\code\\HMS-project\\auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\RegisterRequest.java",
               "RelativeToolTip": "auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\RegisterRequest.java",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001630|",
-              "WhenOpened": "2026-05-09T02:39:12.594Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-09T02:39:12.594Z"
             }
           ]
         }

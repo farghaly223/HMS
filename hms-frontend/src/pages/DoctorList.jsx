@@ -1,17 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Stethoscope, CheckCircle, Trash2, Plus, Loader2, X } from 'lucide-react';
+import { Stethoscope, Plus, Trash2, CheckCircle, Loader2, X, Search, Filter } from 'lucide-react';
 import { doctorAPI } from '../services/ApiService';
 import toast from 'react-hot-toast';
+import { getUser } from '../utils/helpers';
+import { LoadingSpinner, Modal, Button, FormInput, Card, EmptyState } from '../components/UIComponents';
+import { STATUS_BADGE_COLORS } from '../utils/constants';
 
 export default function DoctorList() {
+  const user = getUser();
   const [doctors, setDoctors] = useState([]);
+  const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterApproved, setFilterApproved] = useState('all');
 
   const [form, setForm] = useState({
-    userId: user.userId,
+    userId: user?.userId,
     name: '',
     specialization: '',
     phone: '',
@@ -20,36 +26,73 @@ export default function DoctorList() {
     consultationFee: 0,
   });
 
+  const [errors, setErrors] = useState({});
+
   useEffect(() => {
     fetchDoctors();
   }, []);
+
+  useEffect(() => {
+    filterDoctors();
+  }, [doctors, searchTerm, filterApproved]);
 
   const fetchDoctors = async () => {
     setLoading(true);
     try {
       const res = await doctorAPI.getAll();
-      setDoctors(res.data);
+      setDoctors(res.data || []);
     } catch (err) {
-      // handled by interceptor
+      console.error('Error fetching doctors:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  const filterDoctors = () => {
+    let filtered = doctors;
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(
+        (d) =>
+          d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          d.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (d.phone && d.phone.includes(searchTerm))
+      );
+    }
+
+    // Approval filter
+    if (filterApproved === 'approved') {
+      filtered = filtered.filter((d) => d.isApproved);
+    } else if (filterApproved === 'pending') {
+      filtered = filtered.filter((d) => !d.isApproved);
+    }
+
+    setFilteredDoctors(filtered);
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!form.name.trim()) newErrors.name = 'Name is required';
+    if (!form.specialization.trim()) newErrors.specialization = 'Specialization is required';
+    if (form.consultationFee <= 0) newErrors.consultationFee = 'Consultation fee must be greater than 0';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.specialization || !form.consultationFee) {
-      toast.error('Please fill required fields');
-      return;
-    }
+    if (!validateForm()) return;
+
     setSubmitting(true);
     try {
       await doctorAPI.create(form);
       toast.success('Doctor profile created! Awaiting admin approval.');
+      resetForm();
       setShowForm(false);
       fetchDoctors();
     } catch (err) {
-      // handled by interceptor
+      // Error handled by interceptor
     } finally {
       setSubmitting(false);
     }
@@ -61,7 +104,7 @@ export default function DoctorList() {
       toast.success('Doctor approved!');
       fetchDoctors();
     } catch (err) {
-      // handled by interceptor
+      // Error handled by interceptor
     }
   };
 
@@ -72,93 +115,249 @@ export default function DoctorList() {
       toast.success('Doctor deleted');
       fetchDoctors();
     } catch (err) {
-      // handled by interceptor
+      // Error handled by interceptor
     }
   };
 
+  const resetForm = () => {
+    setForm({
+      userId: user?.userId,
+      name: '',
+      specialization: '',
+      phone: '',
+      email: '',
+      experienceYears: 0,
+      consultationFee: 0,
+    });
+    setErrors({});
+  };
+
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Doctors</h1>
-        {user.role === 'DOCTOR' && (
-          <button onClick={() => setShowForm(true)} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-            <Plus className="w-4 h-4" /> Create Profile
-          </button>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Doctors</h1>
+          <p className="text-gray-600 text-sm mt-1">Manage healthcare professionals</p>
+        </div>
+        {user?.role === 'DOCTOR' && (
+          <Button
+            onClick={() => {
+              resetForm();
+              setShowForm(true);
+            }}
+            variant="primary"
+          >
+            <Plus className="w-4 h-4" />
+            Create Profile
+          </Button>
         )}
       </div>
 
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Create Doctor Profile</h2>
-              <button onClick={() => setShowForm(false)}><X className="w-5 h-5 text-gray-500" /></button>
-            </div>
-            <form onSubmit={handleCreate} className="space-y-3">
-              <input type="text" placeholder="Full Name *" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-              <input type="text" placeholder="Specialization *" value={form.specialization} onChange={(e) => setForm({ ...form, specialization: e.target.value })} className="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-              <input type="text" placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} className="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-              <input type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-              <input type="number" placeholder="Experience (years)" value={form.experienceYears} onChange={(e) => setForm({ ...form, experienceYears: parseInt(e.target.value) })} className="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-              <input type="number" placeholder="Consultation Fee *" value={form.consultationFee} onChange={(e) => setForm({ ...form, consultationFee: parseFloat(e.target.value) })} className="w-full px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
-              <button type="submit" disabled={submitting} className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2">
-                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                {submitting ? 'Creating...' : 'Create Profile'}
-              </button>
-            </form>
+      {/* Search and Filters */}
+      <Card className="p-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by name, specialization, or phone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            />
           </div>
+          <select
+            value={filterApproved}
+            onChange={(e) => setFilterApproved(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          >
+            <option value="all">All Doctors</option>
+            <option value="approved">Approved Only</option>
+            <option value="pending">Pending Approval</option>
+          </select>
+        </div>
+      </Card>
+
+      {/* Doctor Modal */}
+      <Modal
+        isOpen={showForm}
+        onClose={() => {
+          setShowForm(false);
+          resetForm();
+        }}
+        title="Create Doctor Profile"
+        size="lg"
+      >
+        <form onSubmit={handleCreate} className="space-y-4">
+          <FormInput
+            label="Full Name"
+            placeholder="Dr. John Doe"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            error={errors.name}
+            required
+          />
+
+          <FormInput
+            label="Specialization"
+            placeholder="Cardiology"
+            value={form.specialization}
+            onChange={(e) => setForm({ ...form, specialization: e.target.value })}
+            error={errors.specialization}
+            required
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormInput
+              label="Phone"
+              placeholder="1234567890"
+              type="tel"
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            />
+            <FormInput
+              label="Email"
+              placeholder="doctor@example.com"
+              type="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormInput
+              label="Experience (years)"
+              type="number"
+              min="0"
+              value={form.experienceYears}
+              onChange={(e) => setForm({ ...form, experienceYears: parseInt(e.target.value) })}
+            />
+            <FormInput
+              label="Consultation Fee"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              value={form.consultationFee}
+              onChange={(e) => setForm({ ...form, consultationFee: parseFloat(e.target.value) })}
+              error={errors.consultationFee}
+              required
+            />
+          </div>
+
+          <div className="flex gap-2 pt-4">
+            <Button type="submit" variant="primary" disabled={submitting} className="flex-1">
+              {submitting ? 'Creating...' : 'Create Profile'}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setShowForm(false);
+                resetForm();
+              }}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Doctors Grid */}
+      {filteredDoctors.length === 0 ? (
+        <EmptyState
+          icon={Stethoscope}
+          title="No Doctors Found"
+          description={
+            searchTerm || filterApproved !== 'all'
+              ? 'Try adjusting your search or filter criteria'
+              : 'No doctors registered yet'
+          }
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredDoctors.map((doctor) => (
+            <Card key={doctor.id} className="p-6 hover:shadow-lg transition-shadow">
+              {/* Header */}
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                    <Stethoscope className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900">{doctor.name}</h3>
+                    <p className="text-sm text-gray-600">{doctor.specialization}</p>
+                  </div>
+                </div>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    doctor.isApproved
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-yellow-100 text-yellow-700'
+                  }`}
+                >
+                  {doctor.isApproved ? 'Approved' : 'Pending'}
+                </span>
+              </div>
+
+              {/* Details */}
+              <div className="space-y-3 py-4 border-y border-gray-200">
+                <div>
+                  <p className="text-xs text-gray-600 font-semibold">Consultation Fee</p>
+                  <p className="text-lg font-bold text-gray-900">${doctor.consultationFee}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-600 font-semibold">Experience</p>
+                  <p className="text-sm text-gray-800">{doctor.experienceYears} years</p>
+                </div>
+                {doctor.phone && (
+                  <div>
+                    <p className="text-xs text-gray-600 font-semibold">Phone</p>
+                    <p className="text-sm text-gray-800">{doctor.phone}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              {user?.role === 'ADMIN' && (
+                <div className="mt-4 flex gap-2">
+                  {!doctor.isApproved && (
+                    <Button
+                      onClick={() => handleApprove(doctor.id)}
+                      variant="success"
+                      size="sm"
+                      className="flex-1"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      Approve
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => handleDelete(doctor.id)}
+                    variant="danger"
+                    size="sm"
+                    className="flex-1"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </Button>
+                </div>
+              )}
+            </Card>
+          ))}
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {doctors.map((doctor) => (
-          <div key={doctor.id} className="bg-white rounded-xl border border-gray-200 p-5">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                  <Stethoscope className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-800">{doctor.name}</h3>
-                  <p className="text-sm text-gray-500">{doctor.specialization}</p>
-                </div>
-              </div>
-              <span className={`text-xs px-2 py-1 rounded-full font-medium ${doctor.isApproved ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                {doctor.isApproved ? 'Approved' : 'Pending'}
-              </span>
-            </div>
-            <div className="mt-4 space-y-1 text-sm text-gray-600">
-              <p>Fee: <span className="font-medium">${doctor.consultationFee}</span></p>
-              <p>Experience: {doctor.experienceYears} years</p>
-              {doctor.phone && <p>Phone: {doctor.phone}</p>}
-            </div>
-            {user.role === 'ADMIN' && (
-              <div className="mt-4 flex gap-2">
-                {!doctor.isApproved && (
-                  <button onClick={() => handleApprove(doctor.id)} className="flex items-center gap-1 text-sm bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100">
-                    <CheckCircle className="w-4 h-4" /> Approve
-                  </button>
-                )}
-                <button onClick={() => handleDelete(doctor.id)} className="flex items-center gap-1 text-sm bg-red-50 text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-100">
-                  <Trash2 className="w-4 h-4" /> Delete
-                </button>
-              </div>
-            )}
-          </div>
-        ))}
+      {/* Results Count */}
+      <div className="text-center text-sm text-gray-600">
+        Showing {filteredDoctors.length} of {doctors.length} doctor{doctors.length !== 1 ? 's' : ''}
       </div>
-
-      {doctors.length === 0 && (
-        <div className="text-center py-12 text-gray-500">No doctors found.</div>
-      )}
     </div>
   );
 }

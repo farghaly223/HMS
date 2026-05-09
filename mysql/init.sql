@@ -82,3 +82,22 @@ CREATE TABLE IF NOT EXISTS invoices (
     payment_status ENUM('PAID', 'UNPAID', 'PARTIALLY_PAID') DEFAULT 'UNPAID',
     issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+-- Use patient database
+USE patient_db;
+
+-- Option 1: Add individual columns to patients table (RECOMMENDED)
+ALTER TABLE patients 
+ADD COLUMN visit_date DATETIME AFTER medical_history,
+ADD COLUMN diagnosis LONGTEXT AFTER visit_date,
+ADD COLUMN treatment LONGTEXT AFTER diagnosis,
+ADD COLUMN medications LONGTEXT AFTER treatment,
+ADD COLUMN tests LONGTEXT AFTER medications,
+ADD COLUMN notes LONGTEXT AFTER tests,
+ADD COLUMN created_at DATETIME DEFAULT CURRENT_TIMESTAMP AFTER notes,
+ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at;
+
+-- Create index for better performance
+ALTER TABLE patients ADD INDEX idx_visit_date (visit_date);
+ALTER TABLE patients ADD INDEX idx_created_at (created_at);

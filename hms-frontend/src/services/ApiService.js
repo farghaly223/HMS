@@ -1,15 +1,17 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 10000,
 });
 
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -21,18 +23,27 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Response interceptor
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const message = error.response?.data?.message || error.response?.data?.error || error.message;
+    
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
       toast.error('Session expired. Please login again.');
     } else if (error.response?.status === 403) {
-      toast.error('Access denied. Insufficient permissions.');
+      toast.error('Access denied. You don\'t have permission to perform this action.');
+    } else if (error.response?.status === 400) {
+      toast.error(message || 'Invalid request. Please check your input.');
+    } else if (error.response?.status >= 500) {
+      toast.error('Server error. Please try again later.');
+    } else if (error.message === 'Network Error') {
+      toast.error('Network error. Please check your connection.');
     } else {
-      toast.error(error.response?.data?.error || 'Something went wrong');
+      toast.error(message || 'Something went wrong');
     }
     return Promise.reject(error);
   }
@@ -41,12 +52,14 @@ api.interceptors.response.use(
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
+  validateToken: (token) => api.get('/auth/validate?token=' + token),
 };
 
 export const doctorAPI = {
   getAll: () => api.get('/doctors'),
   getById: (id) => api.get(`/doctors/${id}`),
   create: (data) => api.post('/doctors', data),
+  update: (id, data) => api.put(`/doctors/${id}`, data),
   approve: (id) => api.put(`/doctors/${id}/approve`),
   delete: (id) => api.delete(`/doctors/${id}`),
 };
@@ -58,10 +71,15 @@ export const patientAPI = {
   create: (data) => api.post('/patients', data),
   update: (id, data) => api.put(`/patients/${id}`, data),
   delete: (id) => api.delete(`/patients/${id}`),
+  addMedicalHistory: (patientId, data) => api.post(`/patients/${patientId}/medical-history`, data),
+  getMedicalHistory: (patientId) => api.get(`/patients/${patientId}/medical-history`),
+  updateMedicalHistory: (patientId, historyId, data) => api.put(`/patients/${patientId}/medical-history/${historyId}`, data),
+  deleteMedicalHistory: (patientId, historyId) => api.delete(`/patients/${patientId}/medical-history/${historyId}`),
 };
 
 export const appointmentAPI = {
   getAll: () => api.get('/appointments'),
+  getById: (id) => api.get(`/appointments/${id}`),
   getByPatient: (patientId) => api.get(`/appointments/patient/${patientId}`),
   getByDoctor: () => api.get('/appointments/doctor'),
   book: (data) => api.post('/appointments', data),
@@ -71,6 +89,7 @@ export const appointmentAPI = {
 
 export const billingAPI = {
   getAll: () => api.get('/billing'),
+  getById: (id) => api.get(`/billing/${id}`),
   getMyInvoices: () => api.get('/billing/my-invoices'),
   getByAppointment: (appointmentId) => api.get(`/billing/appointment/${appointmentId}`),
   create: (data) => api.post('/billing', data),
