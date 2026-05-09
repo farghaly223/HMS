@@ -1,5 +1,6 @@
 package com.hms.doctor.controller;
 
+import jakarta.validation.Valid;
 import com.hms.doctor.dto.DoctorRequest;
 import com.hms.doctor.dto.MedicalHistoryRequest;
 import com.hms.doctor.entity.Doctor;
@@ -21,7 +22,7 @@ public class DoctorController {
     }
 
     @PostMapping
-    public ResponseEntity<Doctor> addDoctor(@RequestBody DoctorRequest request) {
+    public ResponseEntity<Doctor> addDoctor(@Valid @RequestBody DoctorRequest request) {
         return ResponseEntity.ok(doctorService.addDoctor(request));
     }
 
@@ -53,7 +54,7 @@ public class DoctorController {
 
     @PostMapping("/medical-history")
     public ResponseEntity<MedicalHistory> addMedicalHistory(
-            @RequestBody MedicalHistoryRequest request,
+            @Valid @RequestBody MedicalHistoryRequest request,
             @RequestHeader("X-User-Id") Long doctorId) {
         return ResponseEntity.ok(doctorService.addMedicalHistory(request, doctorId));
     }
@@ -66,7 +67,7 @@ public class DoctorController {
     @PutMapping("/medical-history/{id}")
     public ResponseEntity<MedicalHistory> updateMedicalHistory(
             @PathVariable Long id,
-            @RequestBody MedicalHistoryRequest request,
+            @Valid @RequestBody MedicalHistoryRequest request,
             @RequestHeader("X-User-Id") Long doctorId) {
         return ResponseEntity.ok(doctorService.updateMedicalHistory(id, request, doctorId));
     }

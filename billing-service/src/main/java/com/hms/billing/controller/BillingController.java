@@ -1,5 +1,6 @@
 package com.hms.billing.controller;
 
+import jakarta.validation.Valid;
 import com.hms.billing.dto.InvoiceRequest;
 import com.hms.billing.entity.Invoice;
 import com.hms.billing.service.BillingService;
@@ -19,7 +20,7 @@ public class BillingController {
     }
 
     @PostMapping
-    public ResponseEntity<Invoice> createInvoice(@RequestBody InvoiceRequest request) {
+    public ResponseEntity<Invoice> createInvoice(@Valid @RequestBody InvoiceRequest request) {
         return ResponseEntity.ok(billingService.createInvoice(request));
     }
 

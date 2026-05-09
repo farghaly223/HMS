@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\auth-service",
+    "\\auth-service\\src",
+    "\\auth-service\\src\\main",
+    "\\auth-service\\src\\main\\java",
+    "\\auth-service\\src\\main\\java\\com",
+    "\\auth-service\\src\\main\\java\\com\\hms",
+    "\\auth-service\\src\\main\\java\\com\\hms\\auth",
+    "\\auth-service\\src\\main\\java\\com\\hms\\auth\\dto"
+  ],
+  "SelectedNode": "\\auth-service\\src\\main\\java\\com\\hms\\auth\\dto\\RegisterRequest.java",
+  "PreviewInSolutionExplorer": false
+}

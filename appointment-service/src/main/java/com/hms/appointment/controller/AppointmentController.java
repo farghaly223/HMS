@@ -1,5 +1,6 @@
 package com.hms.appointment.controller;
 
+import jakarta.validation.Valid;
 import com.hms.appointment.dto.AppointmentRequest;
 import com.hms.appointment.entity.Appointment;
 import com.hms.appointment.service.AppointmentService;
@@ -20,7 +21,7 @@ public class AppointmentController {
 
     @PostMapping
     public ResponseEntity<Appointment> bookAppointment(
-            @RequestBody AppointmentRequest request,
+            @Valid @RequestBody AppointmentRequest request,
             @RequestHeader("X-User-Id") Long patientId) {
         return ResponseEntity.ok(appointmentService.bookAppointment(request, patientId));
     }

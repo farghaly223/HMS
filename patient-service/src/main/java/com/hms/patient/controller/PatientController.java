@@ -1,5 +1,6 @@
 package com.hms.patient.controller;
 
+import jakarta.validation.Valid;
 import com.hms.patient.dto.PatientRequest;
 import com.hms.patient.entity.Patient;
 import com.hms.patient.service.PatientService;
@@ -19,7 +20,7 @@ public class PatientController {
     }
 
     @PostMapping
-    public ResponseEntity<Patient> createPatient(@RequestBody PatientRequest request) {
+    public ResponseEntity<Patient> createPatient(@Valid @RequestBody PatientRequest request) {
         return ResponseEntity.ok(patientService.createPatient(request));
     }
 
@@ -41,7 +42,7 @@ public class PatientController {
     @PutMapping("/{id}")
     public ResponseEntity<Patient> updatePatient(
             @PathVariable Long id,
-            @RequestBody PatientRequest request,
+            @Valid @RequestBody PatientRequest request,
             @RequestHeader("X-User-Id") Long userId) {
         return ResponseEntity.ok(patientService.updatePatient(id, request, userId));
     }
